@@ -1,0 +1,12 @@
+# Local browser packaging and keys
+*.crx
+*.pem
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local notes and captures
+*.log
+screenshots/
