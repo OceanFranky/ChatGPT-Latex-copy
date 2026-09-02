@@ -10,7 +10,6 @@ $$\mathrm{MSE} = \frac{1}{N}\sum_{i=1}^{N}\left(y_i-\hat{y}_i\right)^2$$
 
 你可以将结果粘贴到支持数学 Markdown 的编辑器中，让编辑器将其识别或渲染为正常公式。
 
-> 这是实验性本地扩展，不隶属于或由 OpenAI、ChatGPT、Gemini、Google 或语雀官方发布。
 
 ## 适合谁
 
@@ -27,7 +26,7 @@ $$\mathrm{MSE} = \frac{1}{N}\sum_{i=1}^{N}\left(y_i-\hat{y}_i\right)^2$$
 ## 浏览器支持
 
 - **Google Chrome：已支持。**
-- **Microsoft Edge（Chromium 版）：已支持，安装方式与 Chrome 基本相同。**
+- **Microsoft Edge：已支持，安装方式与 Chrome 基本相同。**
 - Brave、Vivaldi、Opera 等 Chromium 浏览器：理论上可加载，但尚未逐一测试。
 - Firefox、Safari：暂未支持。
 
@@ -71,7 +70,6 @@ chatgpt-math-source-poc
 6. 打开或刷新 `https://chatgpt.com/`。
 7. 进入一条含公式的回复，按下面的“怎么使用”步骤测试。
 
-如果 Edge 显示加载错误，请复制错误文字或截图提交 issue，并附上 Edge 版本号。
 
 ## 怎么使用
 
@@ -80,21 +78,6 @@ chatgpt-math-source-poc
 3. 点击右下角的 **复制选中内容** 按钮。
 4. 将结果粘贴到语雀或其他支持 LaTeX Markdown 的编辑器。
 
-### 示例
-
-在 ChatGPT 中选中：
-
-```text
-均方误差可以写成 [渲染公式]
-```
-
-复制后得到：
-
-```markdown
-均方误差可以写成
-
-$$\mathrm{MSE} = \frac{1}{N}\sum_{i=1}^{N}\left(y_i-\hat{y}_i\right)^2$$
-```
 
 ## 关于语雀和其他编辑器
 
@@ -140,7 +123,3 @@ $$\mathrm{MSE} = \frac{1}{N}\sum_{i=1}^{N}\left(y_i-\hat{y}_i\right)^2$$
 │   └── PRIVACY.md          # 隐私说明
 └── CHANGELOG.md
 ```
-
-## 免责声明
-
-本项目与 OpenAI、ChatGPT、Gemini、Google 和语雀没有关联。请仅从可信来源安装扩展，并在处理敏感对话前自行审查源码。
