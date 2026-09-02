@@ -1,29 +1,33 @@
 # ChatGPT LaTeX Copy
 
-一个本地运行的 Chrome 扩展测试版：在 ChatGPT 回复中鼠标选中普通文字和数学公式后，将选区复制为紧凑 Markdown + LaTeX。
+让 ChatGPT 的数学公式像 Gemini 一样，更容易复制到语雀、Obsidian、Typora 等支持 LaTeX Markdown 的编辑器中。
 
-例如，页面上的渲染公式会复制为：
+ChatGPT 中用鼠标直接复制公式时，往往得到的是 `∑`、上下标等视觉文本，粘贴后无法继续作为公式编辑。本扩展会把你选中的 ChatGPT 内容转换为编辑器友好的 LaTeX Markdown：
 
 ```markdown
-$$\mathrm{MSE} = \frac{1}{N} \sum_{i=1}^{N} \left(y_i-\hat{y}_i\right)^2$$
+$$\mathrm{MSE} = \frac{1}{N}\sum_{i=1}^{N}\left(y_i-\hat{y}_i\right)^2$$
 ```
 
-而不是 `∑`、上下标等视觉文本。
+你可以将结果粘贴到支持数学 Markdown 的编辑器中，让编辑器将其识别或渲染为正常公式。
 
-> 这是实验性本地扩展，不隶属于或由 OpenAI、ChatGPT 或 Google 官方发布。
+> 这是实验性本地扩展，不隶属于或由 OpenAI、ChatGPT、Gemini、Google 或语雀官方发布。
 
-## 当前能力
+## 适合谁
 
-- 支持同一条 ChatGPT assistant 回复内的局部鼠标选区。
-- 保留选中的普通文本。
-- 将选区内触及的 KaTeX 公式替换为缓存的 LaTeX 源码。
-- 将块级公式统一输出为单行 `$$...$$`，行内公式统一输出为 `$...$`。
-- 不上传数据、不使用后端、不写入磁盘；消息内容只在当前页面内存中短暂缓存。
+如果你会在 ChatGPT 阅读数学、物理、机器学习或科研公式，并希望把内容继续写进语雀、笔记软件或 Markdown 文档，这个扩展就是为这个场景设计的。
 
-## 安装
+## 它做什么
+
+- 在一条 ChatGPT 回复内选中普通文字、公式，或两者组合。
+- 保留选中的文字。
+- 将选中的渲染公式转换为 LaTeX Markdown。
+- 块级公式输出为 `$$...$$`，行内公式输出为 `$...$`。
+- 不上传对话内容；处理仅在你的浏览器当前页面内完成。
+
+## 安装 Chrome 扩展
 
 1. 下载本项目 ZIP 并解压，或克隆仓库。
-2. 在 Chrome 地址栏打开：
+2. 在 Chrome 地址栏输入并打开：
 
    ```text
    chrome://extensions
@@ -31,70 +35,77 @@ $$\mathrm{MSE} = \frac{1}{N} \sum_{i=1}^{N} \left(y_i-\hat{y}_i\right)^2$$
 
 3. 打开右上角的“开发者模式”。
 4. 点击“加载已解压的扩展程序”。
-5. 选择**本目录**（必须能看到 `manifest.json` 的目录）。
-6. 打开新的 `https://chatgpt.com/` 标签页。
+5. 选择本项目目录，也就是能看到 `manifest.json` 的文件夹。
+6. 刷新已打开的 ChatGPT 页面，或新开一个 `https://chatgpt.com/` 标签页。
 
-## 使用
+## 怎么使用
 
 1. 让 ChatGPT 生成包含数学公式的回复。
-2. 在同一条 assistant 回复中拖选文字、公式，或两者组合。
-3. 点击页面右下角的 **复制选中内容** 按钮。
-4. 粘贴到支持 Markdown/LaTeX 的编辑器。
+2. 用鼠标在**同一条 assistant 回复内**拖选需要的文字和/或公式。
+3. 点击右下角的 **复制选中内容** 按钮。
+4. 将结果粘贴到语雀或其他支持 LaTeX Markdown 的编辑器。
 
-提示：扩展需要在页面加载前安装，因此安装、更新或刷新扩展后，请刷新 ChatGPT 标签页。
+### 示例
 
-## 隐私与权限
+在 ChatGPT 中选中：
 
-扩展只匹配 `https://chatgpt.com/*`。
+```text
+均方误差可以写成 [渲染公式]
+```
 
-为取得公式的 LaTeX 源码，它会在页面主世界观察 ChatGPT 的相关 `fetch` / XHR 响应，并仅在浏览器内存中建立 `messageId → raw content` 缓存。它不会：
+复制后得到：
 
-- 向任何服务器发送会话内容；
-- 使用分析、广告、遥测或远程代码；
-- 写入本地文件、Cookie、账号信息或浏览历史。
+```markdown
+均方误差可以写成
 
-仍请谨慎：扩展会接触当前 ChatGPT 页面返回的会话文本。不要在未审查源码的情况下用于包含敏感信息的对话。
+$$\mathrm{MSE} = \frac{1}{N}\sum_{i=1}^{N}\left(y_i-\hat{y}_i\right)^2$$
+```
 
-完整说明见 [隐私说明](docs/PRIVACY.md)。
+## 关于语雀和其他编辑器
+
+`$...$`（行内公式）与 `$$...$$`（块级公式）是许多支持数学 Markdown 的编辑器使用的常见约定。
+
+不同编辑器的粘贴行为不完全相同：有的会立即渲染，有的会在按空格、确认输入或切换编辑状态后转换，也有的完全不支持 LaTeX Markdown。本扩展保证输出可移植的 LaTeX Markdown，不保证每个编辑器都自动转换。
 
 ## 已知限制
 
-- 仅支持 ChatGPT 网页版，且只支持同一条 assistant 回复内的选区。
-- 目前通过右下角按钮复制，**不会拦截普通 Ctrl+C**。
-- 依赖 ChatGPT 当前 Network payload 和 DOM 结构；ChatGPT 更新后可能需要适配。
-- 只在 raw message 中的公式数量与页面公式数量一致时转换，避免复制错误 LaTeX。
-- 当前探针覆盖 `fetch` / XHR；如果 ChatGPT 切换到其他传输机制，可能无法捕获消息源码。
+- 仅支持 ChatGPT 网页版。
+- 选区必须位于同一条 assistant 回复内。
+- 当前通过右下角按钮复制，尚未接管普通 `Ctrl+C`。
+- ChatGPT 更新页面 DOM 或消息传输格式后，扩展可能需要更新。
+- 为避免复制错误的公式，只有页面公式数量与捕获到的源码数量一致时才会转换。
+
+## 隐私
+
+扩展只在 `https://chatgpt.com/*` 运行。它会在浏览器内存中暂存当前页面所需的消息源码，以恢复公式 LaTeX；不会上传、出售、共享或持久保存 ChatGPT 对话内容。
+
+详情请查看 [隐私说明](docs/PRIVACY.md)。
+
+## 开发与反馈
+
+欢迎提交 issue，附上：
+
+- ChatGPT 页面中公式的截图；
+- 你选中的范围；
+- 实际复制结果；
+- 目标编辑器及其版本；
+- 期望得到的 Markdown/LaTeX。
+
+请勿在 issue 中贴出敏感对话、Cookie、令牌或个人信息。
 
 ## 项目结构
 
 ```text
 .
 ├── manifest.json           # Manifest V3 配置
-├── source-probe-main.js    # MAIN world：捕获页面消息数据
-├── bridge.js               # 选区映射、LaTeX 格式化与浮动复制控件
+├── source-probe-main.js    # 捕获 ChatGPT 页面中的消息源码
+├── bridge.js               # 选区转换、LaTeX 格式化与复制控件
 ├── docs/
-│   ├── ARCHITECTURE.md     # 数据流与边界说明
+│   ├── ARCHITECTURE.md     # 技术架构
 │   └── PRIVACY.md          # 隐私说明
 └── CHANGELOG.md
 ```
 
-## 开发
+## 免责声明
 
-修改代码后：
-
-1. 在 `chrome://extensions` 点击扩展卡片的刷新按钮。
-2. 刷新 ChatGPT 页面。
-3. 使用含公式的新回复回归测试：普通文本、单个公式、文字加公式、多个公式。
-
-提交前可做基础语法检查：
-
-```powershell
-node --check .\bridge.js
-node --check .\source-probe-main.js
-```
-
-## 发布到 GitHub
-
-推荐创建一个新的 GitHub 仓库，并将本目录内容作为仓库根目录上传。对于非技术用户，可在 GitHub Releases 附上 ZIP；ZIP 解压后应直接包含 `manifest.json`，避免多嵌套一层目录。
-
-GitHub 发布不会让扩展自动更新。用户需要下载新版本、替换本地文件，并在扩展管理页刷新扩展。
+本项目与 OpenAI、ChatGPT、Gemini、Google 和语雀没有关联。请仅从可信来源安装扩展，并在处理敏感对话前自行审查源码。
