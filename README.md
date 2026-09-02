@@ -24,7 +24,14 @@ $$\mathrm{MSE} = \frac{1}{N}\sum_{i=1}^{N}\left(y_i-\hat{y}_i\right)^2$$
 - 块级公式输出为 `$$...$$`，行内公式输出为 `$...$`。
 - 不上传对话内容；处理仅在你的浏览器当前页面内完成。
 
-## 安装 Chrome 扩展
+## 浏览器支持
+
+- **Google Chrome：已支持。**
+- **Microsoft Edge（Chromium 版）：已支持，安装方式与 Chrome 基本相同。**
+- Brave、Vivaldi、Opera 等 Chromium 浏览器：理论上可加载，但尚未逐一测试。
+- Firefox、Safari：暂未支持。
+
+## 安装：Google Chrome
 
 1. 下载本项目 ZIP 并解压，或克隆仓库。
 2. 在 Chrome 地址栏输入并打开：
@@ -37,6 +44,34 @@ $$\mathrm{MSE} = \frac{1}{N}\sum_{i=1}^{N}\left(y_i-\hat{y}_i\right)^2$$
 4. 点击“加载已解压的扩展程序”。
 5. 选择本项目目录，也就是能看到 `manifest.json` 的文件夹。
 6. 刷新已打开的 ChatGPT 页面，或新开一个 `https://chatgpt.com/` 标签页。
+
+扩展目录应为：
+
+```text
+chatgpt-math-source-poc
+├── manifest.json
+├── bridge.js
+└── source-probe-main.js
+```
+
+不要选择外层 ZIP 文件，也不要选择只包含项目的上级文件夹。
+
+## 安装：Microsoft Edge
+
+1. 下载本项目 ZIP 并解压，或克隆仓库。
+2. 在 Edge 地址栏输入并打开：
+
+   ```text
+   edge://extensions
+   ```
+
+3. 打开页面左下角的“开发人员模式”。
+4. 点击“加载解压缩的扩展”。
+5. 选择包含 `manifest.json` 的 `chatgpt-math-source-poc` 文件夹。
+6. 打开或刷新 `https://chatgpt.com/`。
+7. 进入一条含公式的回复，按下面的“怎么使用”步骤测试。
+
+如果 Edge 显示加载错误，请复制错误文字或截图提交 issue，并附上 Edge 版本号。
 
 ## 怎么使用
 
