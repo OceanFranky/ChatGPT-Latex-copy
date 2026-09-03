@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ChatGPT LaTeX Copy (Local Beta)",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "Copy selected ChatGPT formulas as editor-friendly Markdown + LaTeX. Local-only beta.",
   "content_scripts": [
     {

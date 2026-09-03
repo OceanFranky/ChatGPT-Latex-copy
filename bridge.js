@@ -3,6 +3,7 @@
   'use strict';
 
   const EVENT_SOURCE = 'chatgpt-math-source-probe';
+  const BUILD_VERSION = '1.0.0';
   const messageCache = new Map();
   let lastSelectedMessageId = null;
   let lastSelectedRange = null;
@@ -62,16 +63,31 @@
 
   function geminiStyleFormula(raw) {
     const compact = (body) => body.trim().replace(/\s+/g, ' ');
-    if (raw.startsWith('\\[') && raw.endsWith('\\]')) {
-      return `$$${compact(raw.slice(2, -2))}$$`;
-    }
-    if (raw.startsWith('$$') && raw.endsWith('$$')) {
-      return `$$${compact(raw.slice(2, -2))}$$`;
-    }
-    if (raw.startsWith('\\(') && raw.endsWith('\\)')) {
-      return `$${compact(raw.slice(2, -2))}$`;
-    }
-    return raw;
+    const body = raw.startsWith('\\[') && raw.endsWith('\\]')
+      ? raw.slice(2, -2)
+      : raw.startsWith('$$') && raw.endsWith('$$')
+        ? raw.slice(2, -2)
+        : raw.startsWith('\\(') && raw.endsWith('\\)')
+          ? raw.slice(2, -2)
+          : raw.startsWith('$') && raw.endsWith('$')
+            ? raw.slice(1, -1)
+            : raw;
+    return `$$${compact(body)}$$`;
+  }
+
+  // A final guard for cases where ChatGPT exposes a formula as selectable
+  // LaTeX text beside its rendered KaTeX node. It also converts that form.
+  function forceDoubleDollarDelimiters(text) {
+    return rawFormulas(text).reduce(
+      // Use a callback: a replacement string interprets $$ as a special token
+      // and would silently collapse our intended double-dollar delimiters.
+      (result, raw) => result.replace(raw, () => geminiStyleFormula(raw)),
+      text,
+    );
+  }
+
+  function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   function assistantForNode(node) {
@@ -134,18 +150,38 @@
       return;
     }
 
-    clonedFormulas.forEach((formula, index) => {
+    const formulaSlots = clonedFormulas.map((formula, index) => {
       const sourceIndex = sourceFormulas.indexOf(touchedFormulas[index]);
-      formula.replaceWith(document.createTextNode(geminiStyleFormula(sourceTeX[sourceIndex])));
+      const marker = `\uE000MATH_${index}\uE001`;
+      const visibleText = touchedFormulas[index].textContent
+        .replace(/[\u200B\u2060]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      formula.replaceWith(document.createTextNode(marker));
+      return { marker, visibleText, latex: geminiStyleFormula(sourceTeX[sourceIndex]) };
     });
 
-    const output = serializeFragment(fragment).replace(/\n{3,}/g, '\n\n').trim();
+    let output = serializeFragment(fragment).replace(/\n{3,}/g, '\n\n').trim();
+    // Some ChatGPT formula wrappers clone an accessibility text sibling in addition
+    // to .katex. Remove that adjacent visual duplicate before inserting TeX.
+    for (const slot of formulaSlots) {
+      if (!slot.visibleText) continue;
+      const marker = escapeRegExp(slot.marker);
+      const visible = escapeRegExp(slot.visibleText);
+      output = output
+        .replace(new RegExp(`${visible}\\s*${marker}`), slot.marker)
+        .replace(new RegExp(`${marker}\\s*${visible}`), slot.marker);
+    }
+    for (const slot of formulaSlots) {
+      output = output.replaceAll(slot.marker, () => slot.latex);
+    }
+    output = forceDoubleDollarDelimiters(output);
     await navigator.clipboard.writeText(output);
     console.info('[ChatGPT Math Probe] copied selected content as Markdown/TeX.', {
       messageId: message.dataset.messageId,
       output,
     });
-    notify('Math Probe: 已复制选中内容（公式已替换为 LaTeX）。');
+    notify(`Math Probe v${BUILD_VERSION}: 已复制选中内容（公式使用 $$...$$）。`);
   }
 
   function ensureCopyButton() {
@@ -161,7 +197,7 @@
       '<span aria-hidden="true" style="font:700 24px/1 Playfair Display,Georgia,serif">∑</span>',
       '<span style="display:grid;gap:2px;text-align:left">',
       '<span style="font:600 13px/1.2 Inter,\'Noto Sans SC\',system-ui,sans-serif">复制选中内容</span>',
-      '<span style="font:500 10px/1.2 JetBrains Mono,ui-monospace,monospace;letter-spacing:.06em">LATEX → MARKDOWN</span>',
+      `<span style="font:500 10px/1.2 JetBrains Mono,ui-monospace,monospace;letter-spacing:.06em">LATEX → MARKDOWN · v${BUILD_VERSION}</span>`,
       '</span>'
     ].join('');
     button.setAttribute('aria-label', '复制选中内容为 Gemini 格式 LaTeX');

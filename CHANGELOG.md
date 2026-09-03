@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 - 2026-09-03
+
+- Normalize every copied formula to block-level `$$...$$` for Yuque compatibility.
+
+## 0.6.0 - 2026-09-03
+
+- Remove duplicate KaTeX visual text that can appear next to converted formula source in a partial selection.
+
 ## 0.5.0 - 2026-09-02
 
 - Add Stone & Ink styling for the floating copy control and notifications.
