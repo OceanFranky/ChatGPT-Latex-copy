@@ -74,10 +74,14 @@ ChatGPT-Latex-copy
 
 ## 怎么使用
 
-1. 让 ChatGPT 生成包含数学公式的回复。
+1. 让 ChatGPT 生成包含数学公式的回复，等待生成完成。
 2. 用鼠标在**同一条 assistant 回复内**拖选需要的文字和/或公式。
 3. 点击右下角的 **复制选中内容** 按钮。
 4. 将结果粘贴到语雀或其他支持 LaTeX Markdown 的编辑器。
+
+更新本地扩展文件后，需要在扩展管理页重新加载扩展，再刷新已经打开的 ChatGPT 标签页一次，才能运行新版本。按钮第二行会显示版本号。日常生成新回复不应依赖逐条刷新；v1.4.0 增加了 SSE 分段拼接和现有 WebSocket 消息监听，具体兼容性仍取决于 ChatGPT 当前的消息格式。
+
+如果提示未捕获源码或公式数量未对齐，打开 Console，找到 `[ChatGPT Math Probe] copy blocked` 并展开。反馈时提供这一条诊断：它包含所选消息 ID、页面/源码公式数量和采集状态，比单独的 `raw-message candidate` 更能定位问题。公开反馈时可遮住消息 ID。
 
 
 ## 关于语雀和其他编辑器
@@ -101,6 +105,8 @@ ChatGPT-Latex-copy
 详情请查看 [隐私说明](docs/PRIVACY.md)。
 
 ## 开发与反馈
+
+安装 Node.js 后，在项目目录运行 `node --test tests/*.test.cjs`，可验证历史消息、流式消息、WebSocket 分流和复制保护逻辑。测试使用本地模拟数据，不会向 ChatGPT 发消息。
 
 欢迎提交 issue，附上：
 

@@ -3,8 +3,10 @@
   'use strict';
 
   const EVENT_SOURCE = 'chatgpt-math-source-probe';
-  const BUILD_VERSION = '1.0.0';
+  const BUILD_VERSION = '1.4.1';
   const messageCache = new Map();
+  const captureStatus = new Map();
+  const captureCounts = new Map();
   let lastSelectedMessageId = null;
   let lastSelectedRange = null;
 
@@ -59,6 +61,19 @@
   function rawFormulas(markdown) {
     // The POC covers ChatGPT's common \[...\], $$...$$, \(...\), and $...$ forms.
     return markdown.match(/\\\[[\s\S]*?\\\]|\$\$[\s\S]*?\$\$|\\\([\s\S]*?\\\)|(?<!\$)\$(?!\$)(?:\\.|[^$\\])+\$(?!\$)/g) ?? [];
+  }
+
+  function keepMoreCompleteCandidate(existing, incoming) {
+    // Stream decoders send reconstructed snapshots, including explicit edits
+    // that can shorten a reply. Do not undo those corrections by length.
+    if (incoming.assembled) return incoming;
+    if (!existing) return incoming;
+    const existingFormulaCount = rawFormulas(existing.content).length;
+    const incomingFormulaCount = rawFormulas(incoming.content).length;
+    if (incomingFormulaCount !== existingFormulaCount) {
+      return incomingFormulaCount > existingFormulaCount ? incoming : existing;
+    }
+    return incoming.content.length > existing.content.length ? incoming : existing;
   }
 
   function geminiStyleFormula(raw) {
@@ -132,7 +147,21 @@
     const candidate = messageCache.get(message.dataset.messageId);
     const sourceTeX = candidate ? rawFormulas(candidate.content) : [];
     if (touchedFormulas.length && (!candidate || sourceTeX.length !== sourceFormulas.length)) {
-      notify('Math Probe: 这条回复的公式源码尚未完整缓存，不能安全转换。', 'error');
+      console.warn('[ChatGPT Math Probe] copy blocked', {
+        version: BUILD_VERSION,
+        reason: candidate ? 'formula-count-mismatch' : 'source-missing',
+        messageId: message.dataset.messageId,
+        renderedFormulaCount: sourceFormulas.length,
+        sourceFormulaCount: candidate ? sourceTeX.length : null,
+        selectedFormulaCount: touchedFormulas.length,
+        cachedMessageCount: messageCache.size,
+        sourceTransport: candidate?.transport ?? null,
+        captureStatus: Object.fromEntries(captureStatus),
+        captureCounts: Object.fromEntries(captureCounts),
+      });
+      notify(candidate
+        ? `Math Probe: 公式数量未对齐（页面 ${sourceFormulas.length}，源码 ${sourceTeX.length}）。请等待回复完成；详情见 Console 的 copy blocked。`
+        : 'Math Probe: 尚未捕获这条回复的源码。请等待回复完成；详情见 Console 的 copy blocked。', 'error');
       return;
     }
 
@@ -231,16 +260,27 @@
   window.addEventListener('message', (event) => {
     if (event.source !== window || event.origin !== location.origin) return;
     const data = event.data;
-    if (!data || data.source !== EVENT_SOURCE || data.type !== 'candidate') return;
+    if (!data || data.source !== EVENT_SOURCE) return;
+    if (data.type === 'capture-status') {
+      captureStatus.set(data.transport, data.reason);
+      const key = `${data.transport}:${data.reason}`;
+      captureCounts.set(key, (captureCounts.get(key) ?? 0) + 1);
+      return;
+    }
+    if (data.type !== 'candidate') return;
 
     for (const candidate of data.candidates ?? []) {
+      if (typeof candidate.messageId !== 'string' || typeof candidate.content !== 'string') continue;
       const key = candidate.messageId ?? `unmapped:${messageCache.size + 1}`;
-      messageCache.set(key, candidate);
+      const selectedCandidate = keepMoreCompleteCandidate(messageCache.get(key), candidate);
+      messageCache.set(key, selectedCandidate);
       console.info('[ChatGPT Math Probe] raw-message candidate', {
-        messageId: candidate.messageId ?? null,
-        path: candidate.path,
-        texCommands: candidate.texCommands ?? [],
-        content: candidate.content,
+        messageId: selectedCandidate.messageId ?? null,
+        path: selectedCandidate.path,
+        texCommands: selectedCandidate.texCommands ?? [],
+        formulaCount: rawFormulas(selectedCandidate.content).length,
+        transport: selectedCandidate.transport,
+        content: selectedCandidate.content,
       });
     }
 
