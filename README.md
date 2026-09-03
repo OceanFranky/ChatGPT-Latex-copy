@@ -47,7 +47,7 @@ $$\mathrm{MSE} = \frac{1}{N}\sum_{i=1}^{N}\left(y_i-\hat{y}_i\right)^2$$
 扩展目录应为：
 
 ```text
-chatgpt-math-source-poc
+ChatGPT-Latex-copy
 ├── manifest.json
 ├── bridge.js
 └── source-probe-main.js
